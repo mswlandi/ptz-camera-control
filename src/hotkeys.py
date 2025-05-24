@@ -1,5 +1,5 @@
 import keyboard
-from camera_api import scroll, enable_tracking, disable_tracking, call_1
+from camera.camera_api import scroll, enable_tracking, disable_tracking, call_1
 
 keyboard.add_hotkey('ctrl+alt+shift+e', enable_tracking)
 keyboard.add_hotkey('ctrl+alt+shift+d', disable_tracking)

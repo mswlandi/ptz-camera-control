@@ -1,6 +1,7 @@
 import pygame
-from pygame.locals import *
-from camera_api import scroll, zoom
+from camera.camera_api import scroll, zoom
+from common.state import mouse_mode, scrolling
+from graphics.draw import draw_info, clear_screen
 
 def move_according_to_key(key, speed = 1):
     if key is None:
@@ -17,16 +18,8 @@ def move_according_to_key(key, speed = 1):
         scroll(speed, 0)
 
 # pygame setup
-pygame.init()
-pygame.font.init()
-font = pygame.font.SysFont('Consolas', 30)
-screen = pygame.display.set_mode((480, 480))
 clock = pygame.time.Clock()
 running = True
-
-scrolling = False
-was_scrolling = False
-mouse_mode = False
 
 MOVE_KEYS = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
 pressing_key = None
@@ -54,7 +47,7 @@ while running:
             
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("black")
+    clear_screen()
 
     # LOGIC
     if mouse_mode:
@@ -74,11 +67,7 @@ while running:
             zoom(0)
         scrolling = False
 
-    text_surface = font.render(f'MODO: {"mouse" if mouse_mode else "teclado"}', False, (255, 255, 255))
-
-    # RENDER
-
-    screen.blit(text_surface, (20,20))
+    draw_info()
 
     # flip() the display to put your work on screen
     pygame.display.flip()
