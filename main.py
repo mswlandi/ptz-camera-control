@@ -1,11 +1,11 @@
 import keyboard
-from camera_api import scroll
+from camera_api import scroll, enable_tracking, disable_tracking, call_1
 
-keyboard.add_hotkey('ctrl+shift+a', print, args=('triggered', 'hotkey'))
+keyboard.add_hotkey('ctrl+alt+shift+e', enable_tracking)
+keyboard.add_hotkey('ctrl+alt+shift+d', disable_tracking)
+keyboard.add_hotkey('ctrl+alt+shift+1', call_1)
 
-keyboard.add_hotkey('up', scroll, args=(0, -1))
-keyboard.add_hotkey('down', scroll, args=(0, 1))
-keyboard.add_hotkey('left', scroll, args=(-1, 0))
-keyboard.add_hotkey('right', scroll, args=(1, 0))
+keyboard.add_hotkey('ctrl+right', scroll, args=(1,0))
+keyboard.add_hotkey('ctrl+left', scroll, args=(-1,0))
 
 keyboard.wait('ctrl+shift+esc')

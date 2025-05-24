@@ -6,7 +6,7 @@ import requests
 # [Tilt Speed]: 1 (Slowest) – 20 (Fastest)
 
 # camera_ip = '192.168.0.2'
-camera_ip = 'localhost:5000'
+camera_ip = '10.10.1.200'
 
 
 def _get_action(x: int, y: int) -> str:
@@ -34,6 +34,31 @@ def scroll(x: int, y: int):
     x = abs(x)
     y = abs(y)
 
-    print(f'Action: {action}, x: {x}, y: {y}')
+    # print(f'Action: {action}, x: {x}, y: {y}')
 
     requests.get(f'http://{camera_ip}/cgi-bin/ptzctrl.cgi?ptzcmd&{action}&{x}&{y}')
+
+def zoom(x: int):
+    action = 'zoomstop'
+
+    if (x > 0):
+        action = 'zoomin'
+    if (x < 0):
+        action = 'zoomout'
+
+    requests.get(f'http://{camera_ip}/cgi-bin/ptzctrl.cgi?ptzcmd&{action}&{abs(x)}')
+
+def enable_tracking():
+    print('enabling tracking')
+
+    requests.get(f'http://{camera_ip}/cgi-bin/ptzctrl.cgi?post_aimode&Single_Track')
+
+def disable_tracking():
+    print('disabling tracking')
+
+    requests.get(f'http://{camera_ip}/cgi-bin/ptzctrl.cgi?post_aimode&Off')
+
+def call_1():
+    print('calling position 1')
+
+    requests.get(f'http://{camera_ip}/cgi-bin/ptzctrl.cgi?ptzcmd&poscall&1')
