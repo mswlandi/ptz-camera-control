@@ -1,5 +1,4 @@
 import pygame
-from common.state import mouse_mode
 
 SCREEN_SIZE = (480, 480)
 
@@ -11,7 +10,7 @@ screen = pygame.display.set_mode(SCREEN_SIZE)
 def clear_screen():
     screen.fill("black")
 
-def draw_info():
+def draw_info(mouse_mode=False):
     text_surface = font.render(
         f'MODO: {"mouse" if mouse_mode else "teclado"}', False, (255, 255, 255))
 

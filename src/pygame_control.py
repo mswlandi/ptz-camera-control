@@ -3,26 +3,46 @@ from camera.camera_api import scroll, zoom
 from common.state import mouse_mode, scrolling
 from graphics.draw import draw_info, clear_screen
 
-def move_according_to_key(key, speed = 1):
-    if key is None:
-        scroll(0,0)
-        return
+# Movement speed per command unit
+MOVE_SPEED = 4
 
-    if key == pygame.K_UP:
-        scroll(0, -speed)
-    elif key == pygame.K_DOWN:
-        scroll(0, speed)
-    elif key == pygame.K_LEFT:
-        scroll(-speed, 0)
-    elif key == pygame.K_RIGHT:
-        scroll(speed, 0)
+def compute_scroll_from_keys(keys_dict):
+    """Compute dx, dy from current key states, allowing diagonal movement.
+
+    Opposing keys cancel each other out (e.g., Left+Right => dx = 0).
+    Returns a tuple (dx, dy).
+    """
+    dx = 0
+    dy = 0
+
+    # Horizontal
+    if keys_dict.get(pygame.K_LEFT, False):
+        dx -= MOVE_SPEED
+    if keys_dict.get(pygame.K_RIGHT, False):
+        dx += MOVE_SPEED
+
+    # Vertical (negative dy is up in typical screen coords; adjust if needed)
+    if keys_dict.get(pygame.K_UP, False):
+        dy -= MOVE_SPEED
+    if keys_dict.get(pygame.K_DOWN, False):
+        dy += MOVE_SPEED
+
+    return dx, dy
 
 # pygame setup
 clock = pygame.time.Clock()
 running = True
 
 MOVE_KEYS = [pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]
-pressing_key = None
+keys = {
+    pygame.K_UP: False,
+    pygame.K_DOWN: False,
+    pygame.K_LEFT: False,
+    pygame.K_RIGHT: False
+}
+
+# Track last scroll command to avoid sending duplicates
+last_dx_dy = None
 
 while running:
     for event in pygame.event.get():
@@ -31,7 +51,8 @@ while running:
 
         elif event.type == pygame.KEYDOWN:
             if event.key in MOVE_KEYS:
-                move_according_to_key(event.key, 4)
+                # Update key state; actual scroll will be sent if state changes
+                keys[event.key] = True
             elif event.key == pygame.K_m and not mouse_mode:
                 mouse_mode = True
                 pygame.mouse.set_visible(False)
@@ -43,7 +64,8 @@ while running:
 
         elif event.type == pygame.KEYUP:
             if event.key in MOVE_KEYS:
-                move_according_to_key(None, 4)
+                # Update key state; actual scroll will be sent if state changes
+                keys[event.key] = False
             
 
     # fill the screen with a color to wipe away anything from last frame
@@ -67,7 +89,14 @@ while running:
             zoom(0)
         scrolling = False
 
-    draw_info()
+    # Compute desired scroll from key states and send only on change
+    current_dx_dy = compute_scroll_from_keys(keys)
+    if current_dx_dy != last_dx_dy:
+        dx, dy = current_dx_dy
+        scroll(dx, dy)
+        last_dx_dy = current_dx_dy
+
+    draw_info(mouse_mode=mouse_mode)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
