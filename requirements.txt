@@ -1,2 +1,4 @@
 keyboard
 flask
+pygame
+pyinstaller

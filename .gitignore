@@ -1,1 +1,4 @@
 __pycache__
+build/
+dist/PTZController.exe
+PTZController.spec

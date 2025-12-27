@@ -1,7 +1,8 @@
 import pygame
 from camera.camera_api import scroll, zoom
-from common.state import mouse_mode, scrolling
+from common.state import scrolling
 from graphics.draw import draw_info, clear_screen
+from camera.camera_api import camera_ip
 
 # Movement speed per command unit
 MOVE_SPEED = 4
@@ -53,14 +54,6 @@ while running:
             if event.key in MOVE_KEYS:
                 # Update key state; actual scroll will be sent if state changes
                 keys[event.key] = True
-            elif event.key == pygame.K_m and not mouse_mode:
-                mouse_mode = True
-                pygame.mouse.set_visible(False)
-                pygame.event.set_grab(True)
-            elif event.key == pygame.K_t and mouse_mode:
-                mouse_mode = False
-                pygame.mouse.set_visible(True)
-                pygame.event.set_grab(False)
 
         elif event.type == pygame.KEYUP:
             if event.key in MOVE_KEYS:
@@ -72,10 +65,6 @@ while running:
     clear_screen()
 
     # LOGIC
-    if mouse_mode:
-        delta_x, delta_y = pygame.mouse.get_rel()
-        scroll(int(delta_x/5),int(delta_y/5))
-
     MODS = pygame.key.get_mods()
 
     if MODS & pygame.KMOD_LSHIFT and not scrolling:
@@ -96,7 +85,7 @@ while running:
         scroll(dx, dy)
         last_dx_dy = current_dx_dy
 
-    draw_info(mouse_mode=mouse_mode)
+    draw_info(camera_ip)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
