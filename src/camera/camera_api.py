@@ -47,8 +47,9 @@ def zoom(x: int):
     if (x < 0):
         action = 'zoomout'
 
-    if (action != "zoomstop"):
-        print(f"url: http://{camera_ip}/cgi-bin/ptzctrl.cgi?ptzcmd&{action}&{abs(x)}")
+    # if (action != "zoomstop"):
+    #     print(f"url: http://{camera_ip}/cgi-bin/ptzctrl.cgi?ptzcmd&{action}&{abs(x)}")
+
     requests.get(f'http://{camera_ip}/cgi-bin/ptzctrl.cgi?ptzcmd&{action}&{abs(x)}')
 
 def enable_tracking():

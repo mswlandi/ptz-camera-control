@@ -59,8 +59,7 @@ while running:
             if event.key in MOVE_KEYS:
                 # Update key state; actual scroll will be sent if state changes
                 keys[event.key] = False
-            
-
+    
     # fill the screen with a color to wipe away anything from last frame
     clear_screen()
 

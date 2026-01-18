@@ -23,5 +23,5 @@ pip install -r requirements.txt
 Build the executable with PyInstaller:
 
 ```bash
-pyinstaller --onefile --windowed --icon icon.ico --name PTZController --paths src src\pygame_control.py
+pyinstaller --clean --noconfirm PTZController.spec
 ```
