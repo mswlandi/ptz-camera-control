@@ -6,8 +6,8 @@ import requests
 # [Tilt Speed]: 1 (Slowest) – 20 (Fastest)
 
 # camera_ip = '192.168.0.2'
-#camera_ip = '192.168.100.86'
-camera_ip = '10.10.1.75'
+camera_ip = '192.168.20.200'
+# camera_ip = '10.10.1.75'
 
 
 def _get_action(x: int, y: int) -> str:
