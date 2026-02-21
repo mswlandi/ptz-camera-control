@@ -3,23 +3,20 @@ import cv2
 import numpy as np
 from aiortc import RTCPeerConnection, RTCSessionDescription
 from av import VideoFrame
-from datetime import datetime, timedelta
 import aiohttp
 
 class VideoReceiver:
     def __init__(self):
         self.track = None
+        self.running = True
 
     async def handle_track(self, track):
         print("Inside handle track")
         self.track = track
-        frame_count = 0
-        while True:
+        while self.running:
             try:
                 print("Waiting for frame...")
                 frame = await asyncio.wait_for(track.recv(), timeout=5.0)
-                frame_count += 1
-                print(f"Received frame {frame_count}")
                 
                 if isinstance(frame, VideoFrame):
                     print(f"Frame type: VideoFrame, pts: {frame.pts}, time_base: {frame.time_base}")
@@ -29,18 +26,13 @@ class VideoReceiver:
                 else:
                     print(f"Unexpected frame type: {type(frame)}")
                     continue
-              
-                # Add timestamp to the frame
-                current_time = datetime.now()
-                new_time = current_time - timedelta(seconds=55)
-                timestamp = new_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                cv2.putText(frame, timestamp, (10, frame.shape[0] - 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-                cv2.imwrite(f"imgs/received_frame_{frame_count}.jpg", frame)
-                print(f"Saved frame {frame_count} to file")
+
+                frame = cv2.resize(frame, (960, 540)) 
                 cv2.imshow("Frame", frame)
     
                 # Exit on 'q' key press
                 if cv2.waitKey(1) & 0xFF == ord('q'):
+                    self.running = False
                     break
             except asyncio.TimeoutError:
                 print("Timeout waiting for frame, continuing...")
@@ -48,9 +40,11 @@ class VideoReceiver:
                 print(f"Error in handle_track: {str(e)}")
                 if "Connection" in str(e):
                     break
+        
+        cv2.destroyAllWindows()
         print("Exiting handle_track")
 
-async def run(pc, camera_ip, stream_path):
+async def run(pc: RTCPeerConnection, camera_ip: str, stream_path: str, video_receiver: VideoReceiver):
     @pc.on("track")
     def on_track(track):
         print(f"Receiving {track.kind} track")
@@ -66,8 +60,6 @@ async def run(pc, camera_ip, stream_path):
         if pc.connectionState == "connected":
             print("WebRTC connection established successfully")
 
-    # Add transceivers (like in the HTML)
-    pc.addTransceiver("audio", direction="recvonly")
     pc.addTransceiver("video", direction="recvonly")
 
     # Create offer
@@ -107,28 +99,32 @@ async def run(pc, camera_ip, stream_path):
         return
 
     print("Connection established, waiting for frames...")
-    await asyncio.sleep(100)  # Wait for frames
+
+    # Wait until user quits
+    while video_receiver.running:
+        await asyncio.sleep(0.1)
 
     print("Closing connection")
 
 async def main():
     # Use the same camera IP and stream path as in your HTML
-    camera_ip = "192.168.20.200:30080"
+    camera_ip = "10.10.1.200:30080"
     stream_path = "/index/api/webrtc?app=live&stream=stream1&type=play"
     
     pc = RTCPeerConnection()
     
-    global video_receiver
     video_receiver = VideoReceiver()
 
     try:
-        await run(pc, camera_ip, stream_path)
+        await run(pc, camera_ip, stream_path, video_receiver)
     except Exception as e:
         print(f"Error in main: {str(e)}")
         import traceback
         traceback.print_exc()
     finally:
         print("Closing peer connection")
+        video_receiver.running = False
+        cv2.destroyAllWindows()
         await pc.close()
 
 if __name__ == "__main__":
